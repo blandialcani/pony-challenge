@@ -1,5 +1,6 @@
-<form (submit)="startGame()" [formGroup]="form">
-  <mat-card *ngIf="!id" style="width: 30%;margin: auto;">
+<div *ngIf="!id" [@newGame]="id" >
+  <mat-card  *ngIf="!id" style="width: 30%;margin: auto;" >
+      <form (submit)="startGame()" [formGroup]="form" >
     <mat-card-content>
       <h2 matCardTitle>Save the pony</h2>
       <mat-form-field>
@@ -22,9 +23,10 @@
     </mat-card-content>
     <mat-card-actions>
 
-      <button mat-raised-button type="submit" [disabled]="!form.valid">Start Game</button>
+      <button mat-raised-button type="submit">Start Game</button>
     </mat-card-actions>
-  </mat-card>
-</form>
-<app-pony *ngIf="id" [(id)]="id" [pony]="pony.id"
-[width]="form.value.width * 25 +20" [height]="form.value.height  * 25 +20">
+ </form>
+ </mat-card>
+</div>
+<app-pony *ngIf="id" [(id)]="id" [pony]="form.value.pony.id" [@game]=""
+[width]="form.value.width" [height]="form.value.height">

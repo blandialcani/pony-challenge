@@ -1,31 +1,38 @@
-<mat-card  style="margin: auto;" [style.width]="width+100+'px'">
-
-<mat-card-content
-*ngIf="this.game['game-state'].state !== 'won' && this.game['game-state'].state !== 'over'"
-(keydown.ArrowLeft)="move('west')"
-(keydown.ArrowRight)="move('east')"
- tabindex="1"
-(keydown.ArrowUp)="move('north')"
-(keydown.ArrowDown)="move('south')"
-style="height: 100%;width: 100%">
-<div style="margin: auto;width: 130px">
-<button mat-raised-button color="primamry" (click)="startNewGame()"> New Game </button><br >
-<button mat-icon-button [style.visibility]="'hidden'" ><mat-icon >keyboard_arrow_up</mat-icon></button>
-<button mat-icon-button [disabled]="!canMove('north')" (click)="move('north')"><mat-icon >keyboard_arrow_up</mat-icon></button><br />
-<button mat-icon-button  [disabled]="!canMove('west')" (click)="move('west')"><mat-icon >keyboard_arrow_left</mat-icon></button>
-<button mat-icon-button [disabled]="!canMove('south')"  (click)="move('south')"><mat-icon >keyboard_arrow_down</mat-icon></button>
-<button mat-icon-button [disabled]="!canMove('east')"  (click)="move('east')"><mat-icon >keyboard_arrow_right</mat-icon></button>
-<br /></div>
-<div *ngIf="width && height" style="width: 80%;margin: auto;">
-<canvas id="canvas" width="{{width}}" height="{{height}}" #canvas
-style="border:1px solid #d3d3d3;">
-Your browser does not support the canvas element.
-</canvas>
-</div>
-</mat-card-content>
-<div *ngIf="this.game['game-state'].state === 'won'  || this.game['game-state'].state === 'over'" (click)="startNewGame()">
-<h2 matCardTitle color="primary">Click to play again!</h2>
-<mat-card-content>
-<img [src]="baseHref + this.game['game-state']['hidden-url']" style="max-width:100%"/></mat-card-content>
-</div>
+<mat-card style="margin: auto;" [style.width]="width+100+'px'">
+  <mat-card-content *ngIf="this.game['game-state'].state !== 'won' && this.game['game-state'].state !== 'over'" (keydown.ArrowLeft)="move('west', $event)"
+    (keydown.ArrowRight)="move('east', $event);" tabindex="1" (keydown.ArrowUp)="move('north', $event)" (keydown.ArrowDown)="move('south', $event)"
+    style="height: 100%;width: 100%">
+    <div style="margin: auto;width: 120px">
+      <button mat-raised-button color="primamry" (click)="startNewGame()"> New Game </button>
+      <br>
+      <button mat-icon-button [style.visibility]="'hidden'">
+        <mat-icon>keyboard_arrow_up</mat-icon>
+      </button>
+      <button mat-icon-button [disabled]="!canMove('north')" (click)="move('north')">
+        <mat-icon>keyboard_arrow_up</mat-icon>
+      </button>
+      <br />
+      <button mat-icon-button [disabled]="!canMove('west')" (click)="move('west')">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+      <button mat-icon-button [disabled]="!canMove('south')" (click)="move('south')">
+        <mat-icon>keyboard_arrow_down</mat-icon>
+      </button>
+      <button mat-icon-button [disabled]="!canMove('east')" (click)="move('east')">
+        <mat-icon>keyboard_arrow_right</mat-icon>
+      </button>
+      <br />
+    </div>
+    <div *ngIf="width && height" style="width: 80%;margin: auto;">
+      <canvas id="canvas" width="{{width}}" height="{{height}}" #canvas style="border:1px solid #d3d3d3;">
+        Your browser does not support the canvas element.
+      </canvas>
+    </div>
+  </mat-card-content>
+  <div *ngIf="this.game['game-state'].state === 'won'  || this.game['game-state'].state === 'over'" (click)="startNewGame()">
+    <h2 matCardTitle color="primary">Click to play again!</h2>
+    <mat-card-content>
+      <img [src]="baseHref + this.game['game-state']['hidden-url']" style="max-width:100%" />
+    </mat-card-content>
+  </div>
 </mat-card>

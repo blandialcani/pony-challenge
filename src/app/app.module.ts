@@ -15,11 +15,13 @@ import { MatIconModule,
 import { PonyComponent } from './pony/pony.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NewGameComponent } from './new-game/new-game.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    PonyComponent
+    PonyComponent,
+    NewGameComponent
   ],
   imports: [
     BrowserModule,

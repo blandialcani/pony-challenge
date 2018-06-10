@@ -1,7 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Input, Output, EventEmitter } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { PonyService, Game, Move } from './pony.service';
-import { identifierModuleUrl } from '@angular/compiler';
+import { PonyService, Move } from './pony.service';
 
 const convertData = (coordinate) => {
   switch (coordinate.length) {
@@ -15,6 +13,8 @@ const convertData = (coordinate) => {
     }
   }
 }
+const lineLength = 25;
+const lineStart = 10;
 
 @Component({
   selector: 'app-pony',
@@ -32,14 +32,26 @@ export class PonyComponent implements OnInit, AfterViewInit {
   @Output() idChange = new EventEmitter<string>();
 
   private _id: string;
+  private _width: number;
+  private _height: number;
   @Input() set id(id: string) {
     this._id = id;
     this.getGame();
   }
   get id() { return this._id; }
 
-  @Input() width;
-  @Input() height;
+  @Input() set width(width: number) {
+    if (!width) return;
+    this._width = width * lineLength + 2 * lineStart;
+  };
+  get width() { return this._width; }
+
+  @Input() set height(height: number) {
+    if (!height) return;
+    this._height = height * lineLength + 2 * lineStart;
+  };
+  get height() { return this._height; }
+
   @ViewChild('canvas') canvas: ElementRef;
   public context: CanvasRenderingContext2D;
 
@@ -59,72 +71,88 @@ export class PonyComponent implements OnInit, AfterViewInit {
     });
   }
 
-  startNewGame(){
+  startNewGame() {
     this.idChange.emit(undefined);
   }
 
   drawGame(game) {
     this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height);
-    let lineLength = 25;
-    let start = 10;
     game.data.forEach((c, i) => {
-
-      let x = Math.floor(i % game.size[0]) * lineLength + start;
-      let y = Math.floor(i / game.size[0]) * lineLength + start;
+      let x = Math.floor(i % game.size[0]) * lineLength + lineStart;
+      let y = Math.floor(i / game.size[0]) * lineLength + lineStart;
+      //insert north
       if (c[0]) this.drawLine(this.context, x, y, x + lineLength, y);
+      //insert west
       if (c[1]) this.drawLine(this.context, x, y, x, y + lineLength);
+      // if end of row, draw closing line
       if (Math.floor((i + 1) % game.size[0]) == 0)
         this.drawLine(this.context, x + lineLength, y, x + lineLength, y + lineLength);
+      // if end of column, draw closing line
       if (Math.ceil((i + 1) / game.size[0]) == game.size[1])
         this.drawLine(this.context, x, y + lineLength, x + lineLength, y + lineLength);
 
     });
+    //insert domokun
     this.insertImage("assets/images/demogorgon1.png",
-      Math.floor(game.domokun[0] % game.size[0]) * lineLength + start,
-      Math.floor(game.domokun[0] / game.size[0]) * lineLength + start);
-
+      Math.floor(game.domokun[0] % game.size[0]) * lineLength + lineStart,
+      Math.floor(game.domokun[0] / game.size[0]) * lineLength + lineStart);
+    //insert pony
     this.insertImage(`assets/images/${this.pony}.png`,
-      Math.floor(game.pony[0] % game.size[0]) * lineLength + start,
-      Math.floor(game.pony[0] / game.size[0]) * lineLength + start);
-
+      Math.floor(game.pony[0] % game.size[0]) * lineLength + lineStart,
+      Math.floor(game.pony[0] / game.size[0]) * lineLength + lineStart);
+    //insert endpoint
     this.insertImage("assets/images/finish.png",
-      Math.floor(game['end-point'][0] % game.size[0]) * lineLength + start,
-      Math.floor(game['end-point'][0] / game.size[0]) * lineLength + start);
-
+      Math.floor(game['end-point'][0] % game.size[0]) * lineLength + lineStart,
+      Math.floor(game['end-point'][0] / game.size[0]) * lineLength + lineStart);
   }
-  insertImage(uri, x, y) {
+
+  insertImage(uri: string, x: number, y: number) {
     let img = new Image();
     img.src = uri;
     img.onload = () => this.context.drawImage(img, x, y);
   }
-  move(direction) {
-    if (!this.canMove(direction)) return;
+
+  drawLine(ctx: CanvasRenderingContext2D, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+    ctx.beginPath();
+    ctx.moveTo(xStart, yStart);
+    ctx.lineTo(xEnd, yEnd);
+    ctx.stroke();
+  }
+  move(direction: string, $event: Event = undefined) {
+    if ($event !== undefined) {
+      $event.preventDefault();
+      $event.stopPropagation();
+    }
+    if (!this.canMove(direction))
+      return;
     let move: Move = { direction: direction }
     this.ponyService.move(this.id, move).subscribe((response) => {
       this.getGame();
     });
   }
 
-  public canMove(direction) {
+  public canMove(direction: string) {
     if (!this.game || !this.game.data) return false;
-    let up = this.game.data[this.game.pony[0]][0],
-      left = this.game.data[this.game.pony[0]][1],
-      down = this.game.data.length > this.game.pony[0] + this.game.size[0] ? this.game.data[this.game.pony[0] + this.game.size[0]][0] : true,
-      right = this.game.data.length > this.game.pony[0] + 1 ? this.game.data[this.game.pony[0] + 1][1] : true;
+    let cantMoveUp = this.game.data[this.game.pony[0]][0],
+      cantMoveLeft = this.game.data[this.game.pony[0]][1],
+      // also check if in last row, because no  south walls
+      cantMoveDown =
+        this.game.data.length > this.game.pony[0] + this.game.size[0]
+          ? this.game.data[this.game.pony[0] + this.game.size[0]][0]
+          : true,
+      // also check if in last column, because no  east walls
+      cantMoveRight =
+        this.game.data.length > this.game.pony[0] + 1
+          ? this.game.data[this.game.pony[0] + 1][1]
+          : true;
     switch (direction) {
-      case 'north': return !up;
-      case 'west': return !left;
-      case 'east': return !right;
-      case 'south': return !down;
+      case 'north': return !cantMoveUp;
+      case 'west': return !cantMoveLeft;
+      case 'east': return !cantMoveRight;
+      case 'south': return !cantMoveDown;
       default: return false;
     }
   }
 
-  drawLine(ctx, xStart, yStart, xEnd, yEnd) {
-    ctx.beginPath();
-    ctx.moveTo(xStart, yStart);
-    ctx.lineTo(xEnd, yEnd);
-    ctx.stroke();
-  }
 
 }
