@@ -20,19 +20,19 @@
       </button>
       <button mat-icon-button [disabled]="!canMove('east')" (click)="move('east')">
         <mat-icon>keyboard_arrow_right</mat-icon>
-      </button>
-      <br />
+      </button><br />
     </div>
     <div *ngIf="width && height" style="width: 80%;margin: auto;">
+      <div *ngIf="showHint">Click on the board and then use the keyboard arrows to guide the pony! Or just click the arrows above.</div>
       <canvas id="canvas" width="{{width}}" height="{{height}}" #canvas style="border:1px solid #d3d3d3;">
         Your browser does not support the canvas element.
       </canvas>
     </div>
   </mat-card-content>
-  <div *ngIf="this.game['game-state'].state === 'won'  || this.game['game-state'].state === 'over'" (click)="startNewGame()">
-    <h2 matCardTitle color="primary">Click to play again!</h2>
+  <div *ngIf="game['game-state'].state === 'won'  || this.game['game-state'].state === 'over'" (click)="startNewGame()">
+    <h2 matCardTitle color="primary">{{game['game-state']['state-result']}}! Click to play again!</h2>
     <mat-card-content>
-      <img [src]="baseHref + this.game['game-state']['hidden-url']" style="max-width:100%" />
+      <img [src]="baseHref + game['game-state']['hidden-url']" style="max-width:100%" />
     </mat-card-content>
   </div>
 </mat-card>

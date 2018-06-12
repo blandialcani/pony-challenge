@@ -34,6 +34,7 @@ export class PonyComponent implements OnInit, AfterViewInit {
   private _id: string;
   private _width: number;
   private _height: number;
+  public showHint: boolean = true;
   @Input() set id(id: string) {
     this._id = id;
     this.getGame();
@@ -59,6 +60,7 @@ export class PonyComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    setTimeout(_ => this.showHint = false, 5000);
     this.context = (<HTMLCanvasElement>this.canvas.nativeElement).getContext('2d');
   }
   ngOnInit() {
