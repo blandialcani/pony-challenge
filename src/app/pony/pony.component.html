@@ -4,8 +4,19 @@
     style="height: 100%;width: 100%">
     <div style="margin: auto;width: 120px">
       <button mat-raised-button color="primamry" (click)="startNewGame()"> New Game </button>
+      <button mat-icon-button (click)="startStop()" style="margin: auto">
+        <mat-icon *ngIf="!solveAutomatically">play_arrow</mat-icon>
+        <mat-icon *ngIf="solveAutomatically">pause</mat-icon>
+      </button>
+      <div *ngIf="solveAutomatically">Speed
+        <mat-slider style="margin: auto"
+            thumbLabel
+            tickInterval="5"
+            [(ngModel)]="speed"
+            min="1"
+            max="50"></mat-slider></div>
       <br>
-      <button mat-icon-button [style.visibility]="'hidden'">
+      <div *ngIf="!solveAutomatically"><button mat-icon-button [style.visibility]="'hidden'">
         <mat-icon>keyboard_arrow_up</mat-icon>
       </button>
       <button mat-icon-button [disabled]="!canMove('north')" (click)="move('north')">
@@ -20,14 +31,15 @@
       </button>
       <button mat-icon-button [disabled]="!canMove('east')" (click)="move('east')">
         <mat-icon>keyboard_arrow_right</mat-icon>
-      </button><br />
+      </button><br /></div>
+
     </div>
     <div *ngIf="width && height" style="width: 80%;margin: auto;">
-      <div *ngIf="showHint">Click on the board and then use the keyboard arrows to guide the pony! Or just click the arrows above.</div>
       <canvas id="canvas" width="{{width}}" height="{{height}}" #canvas style="border:1px solid #d3d3d3;">
         Your browser does not support the canvas element.
       </canvas>
     </div>
+
   </mat-card-content>
   <div *ngIf="game['game-state'].state === 'won'  || this.game['game-state'].state === 'over'" (click)="startNewGame()">
     <h2 matCardTitle color="primary">{{game['game-state']['state-result']}}! Click to play again!</h2>

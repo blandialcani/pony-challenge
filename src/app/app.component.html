@@ -9,17 +9,28 @@
         </mat-select>
       </mat-form-field>
       <br>
-      <mat-form-field>
-        <input  matInput type="number" [placeholder]="'Width'" formControlName="width" />
-      </mat-form-field>/
-      <mat-form-field>
-        <input  matInput type="number" [placeholder]="'Height'" formControlName="height"
-          />
-      </mat-form-field>
+      Width
+      <mat-slider
+          thumbLabel color="primary"
+          tickInterval="1"
+          formControlName="width"
+          min="15"
+          max="25"></mat-slider>/
+          Height
+      <mat-slider
+          thumbLabel
+          tickInterval="1"
+          formControlName="height"
+          min="15"
+          max="25"></mat-slider>
       <br>
-      <mat-form-field>
-        <input  matInput type="number" [placeholder]="'Difficulty'" formControlName="difficulty"/>
-      </mat-form-field>
+      Difficulty
+      <mat-slider
+          thumbLabel
+          tickInterval="1"
+          formControlName="difficulty"
+          min="1"
+          max="10"></mat-slider>
     </mat-card-content>
     <mat-card-actions>
 

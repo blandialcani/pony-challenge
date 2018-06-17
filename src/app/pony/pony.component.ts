@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Input, Output, EventEmitter } from '@angular/core';
 import { PonyService, Move } from './pony.service';
+import { PonyHelperService } from '../pony-helper.service';
 
 const convertData = (coordinate) => {
   switch (coordinate.length) {
@@ -20,9 +21,10 @@ const lineStart = 10;
   selector: 'app-pony',
   templateUrl: './pony.component.html',
   styleUrls: ['./pony.component.scss'],
-  providers: [PonyService]
+  providers: [PonyService, PonyHelperService]
 })
 export class PonyComponent implements OnInit, AfterViewInit {
+  speed: number = 15;
   public baseHref = 'https://ponychallenge.trustpilot.com';
   public game: any = {
     "game-state": { state: 'Active' }
@@ -35,8 +37,16 @@ export class PonyComponent implements OnInit, AfterViewInit {
   private _width: number;
   private _height: number;
   public showHint: boolean = true;
+  lastMove: string = 'north';
+  solution: any;
+  nextMove: number = 0;
+  public solveAutomatically: boolean = false;
   @Input() set id(id: string) {
     this._id = id;
+    this.nextMove = 0;
+    this.game  = {
+      "game-state": { state: 'Active' }
+    }
     this.getGame();
   }
   get id() { return this._id; }
@@ -56,25 +66,59 @@ export class PonyComponent implements OnInit, AfterViewInit {
   @ViewChild('canvas') canvas: ElementRef;
   public context: CanvasRenderingContext2D;
 
-  constructor(private ponyService: PonyService) {
-  }
+  constructor(private ponyService: PonyService, private ponyHelper: PonyHelperService) {}
 
   ngAfterViewInit(): void {
     setTimeout(_ => this.showHint = false, 5000);
     this.context = (<HTMLCanvasElement>this.canvas.nativeElement).getContext('2d');
   }
-  ngOnInit() {
+
+  startNewGame() { this.idChange.emit(undefined);}
+
+  ngOnInit() {}
+
+  ngDestroy(){
+
   }
+  startStop(){
+    this.solveAutomatically = !this.solveAutomatically;
+    this.solution= null;
+    this.nextMove = 0;
+    this.getGame()
+  }
+
   getGame() {
     this.ponyService.getGame(this.id).subscribe((game: any) => {
       game.data = game.data.map(convertData);
-      this.game = game;
+      this.game = Object.assign({},game);
       this.drawGame(game);
+      if(this.solveAutomatically){
+        this.playNextMove()
+      }
     });
   }
+  playNextMove(){
+    if(!this.solution){
+      let g = JSON.parse(JSON.stringify(this.game));
+      this.solution = this.ponyHelper.solve(g);
+      console.log(this.solution);
+    }
 
-  startNewGame() {
-    this.idChange.emit(undefined);
+    setTimeout(() => {
+      this.move(this.solution[this.nextMove++]);
+    },1000/this.speed);
+  }
+  move(direction: string, $event: Event = undefined) {
+    if ($event !== undefined) {
+      $event.preventDefault();
+      $event.stopPropagation();
+    }
+    if (!this.ponyHelper.canMove(direction, this.game))
+     return;
+    let move: Move = { direction: direction }
+    this.ponyService.move(this.id, move).subscribe((response) => {
+      this.getGame();
+    });
   }
 
   drawGame(game) {
@@ -120,41 +164,8 @@ export class PonyComponent implements OnInit, AfterViewInit {
     ctx.lineTo(xEnd, yEnd);
     ctx.stroke();
   }
-  move(direction: string, $event: Event = undefined) {
-    if ($event !== undefined) {
-      $event.preventDefault();
-      $event.stopPropagation();
-    }
-    if (!this.canMove(direction))
-      return;
-    let move: Move = { direction: direction }
-    this.ponyService.move(this.id, move).subscribe((response) => {
-      this.getGame();
-    });
-  }
 
   public canMove(direction: string) {
-    if (!this.game || !this.game.data) return false;
-    let cantMoveUp = this.game.data[this.game.pony[0]][0],
-      cantMoveLeft = this.game.data[this.game.pony[0]][1],
-      // also check if in last row, because no  south walls
-      cantMoveDown =
-        this.game.data.length > this.game.pony[0] + this.game.size[0]
-          ? this.game.data[this.game.pony[0] + this.game.size[0]][0]
-          : true,
-      // also check if in last column, because no  east walls
-      cantMoveRight =
-        this.game.data.length > this.game.pony[0] + 1
-          ? this.game.data[this.game.pony[0] + 1][1]
-          : true;
-    switch (direction) {
-      case 'north': return !cantMoveUp;
-      case 'west': return !cantMoveLeft;
-      case 'east': return !cantMoveRight;
-      case 'south': return !cantMoveDown;
-      default: return false;
-    }
+    return this.ponyHelper.canMove(direction, this.game);
   }
-
-
 }

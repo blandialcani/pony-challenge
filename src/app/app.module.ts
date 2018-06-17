@@ -11,7 +11,9 @@ import { MatIconModule,
   MatSelectModule,
   MatFormFieldModule,
   MatInputModule,
-  MatCardModule} from "@angular/material";
+  MatCardModule,
+  MatSliderModule,
+  MatCheckboxModule} from "@angular/material";
 import { PonyComponent } from './pony/pony.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -26,6 +28,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     BrowserAnimationsModule,
     ReactiveFormsModule,
     MatIconModule,
+    MatSliderModule,
+    MatCheckboxModule,
     MatCardModule,
     MatInputModule,
     MatFormFieldModule,
